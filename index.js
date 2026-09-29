@@ -1,9 +1,33 @@
 import Board from './Board.mjs';
+import BoardSolver from './BoardSolver.mjs';
 
-const board = new Board();
+const board = Board.bySize(3);
+board.shuffle(10000);
+console.log(board.show());
 
-console.log(`"${board.toString()}"`);
-console.log(board.availableDirections);
-board.moveBlank(board.availableDirections[0]);
-console.log(board.availableDirections);
-console.log(`"${board.toString()}"`);
+const boardSolver = new BoardSolver(board);
+
+boardSolver.greedyScan(2);
+
+const MAX_ITERATIONS = 10000;
+let iteration = 0;
+while(!boardSolver.isSolved && iteration < MAX_ITERATIONS)
+{
+    boardSolver.greedyScan(2);
+    iteration++;
+}
+
+if(boardSolver.isSolved)
+{
+    console.log("Solved in " + iteration + " iterations");
+    let route = boardSolver.getRoute();
+    console.log("Route length: "+route.length);
+    for(let state of route)
+    {
+        console.log(state.show());
+    }
+}
+else
+{
+    console.log("Not solved in " + iteration + " iterations");
+}

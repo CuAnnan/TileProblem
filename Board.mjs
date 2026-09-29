@@ -1,15 +1,18 @@
+const alphabet="123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
 class Board
 {
     #cells;
     #blankCellPosition;
-    #initialised;
+    solvedState;
+    size;
+
     #directions = {
         up:{x:0, y:-1},
         down:{x:0, y:1},
         left:{x:-1, y:0},
         right:{x:1, y:0},
     }
-    #correctCells="12345678 ";
 
     #oppositeDirections = {
         "up":"down",
@@ -17,6 +20,26 @@ class Board
         "left":"right",
         "right":"left",
     };
+
+    static get correctCells()
+    {
+        return "12345678 ";
+    }
+
+    get isSolved()
+    {
+        return this.toString() === Board.correctCells;
+    }
+
+    show()
+    {
+        let string = "";
+        for(let row of this.#cells)
+        {
+            string += row.join(" ")+"\n";
+        }
+        return string;
+    }
 
     toString()
     {
@@ -28,14 +51,24 @@ class Board
         return string;
     }
 
-    constructor(string=this.#correctCells)
+    /**
+     * @param {String} string
+     * @param {String} solvedState
+     * @param {Number} size
+     */
+    constructor(string="12345678 ", solvedState = "12345678 ", size=3)
     {
         const cells = string.split("");
-        this.#cells = [[],[],[]];
-        for(let i = 0; i < 9; i++)
+        this.#cells = [];
+        for(let i = 0; i < size; i++)
         {
-            let row = Math.floor(i/3);
-            let col = i%3;
+            this.#cells.push([]);
+        }
+        let sizeSquared = size * size;
+        for(let i = 0; i < sizeSquared; i++)
+        {
+            let row = Math.floor(i/size);
+            let col = i%size;
             let char = string.charAt(i);
             this.#cells[row][col] = char;
             if(char === " ")
@@ -43,7 +76,20 @@ class Board
                 this.#blankCellPosition={x:col,y:row};
             }
         }
+        this.solvedState = solvedState;
+        this.size = size;
+    }
 
+    static bySize(size)
+    {
+        let string = "";
+        let sizeSquared = size * size;
+        for (let i = 1; i < sizeSquared; i++) {
+            string += alphabet.charAt(i - 1);
+        }
+        string += " ";
+        console.log(`String: "${string}"`);
+        return new Board(string, string, size);
     }
 
     moveBlank(direction)
@@ -62,9 +108,29 @@ class Board
         }
     }
 
+    shuffleArray(toShuffle)
+    {
+        let shuffled = [...toShuffle];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+            let j = Math.floor(Math.random() * (i + 1));
+            [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+    }
+
+
     moveBlankRandomly()
     {
-        let direction = this.availableDirections.sort((a,b) => Math.);
+        let randomDirection = this.shuffleArray(this.availableDirections)[0];
+        this.moveBlank(randomDirection);
+    }
+
+    shuffle(times=100)
+    {
+        for(let i = 0; i < times; i++)
+        {
+            this.moveBlankRandomly();
+        }
     }
 
     getCellAtCoords(coords)
@@ -101,8 +167,8 @@ class Board
         return (
             this.#blankCellPosition.x + directionCoords.x >=0 &&
             this.#blankCellPosition.y + directionCoords.y >=0 &&
-            this.#blankCellPosition.x + directionCoords.x <=2 &&
-            this.#blankCellPosition.y + directionCoords.y <=2
+            this.#blankCellPosition.x + directionCoords.x < this.size &&
+            this.#blankCellPosition.y + directionCoords.y < this.size
         );
     }
 }
