@@ -1,4 +1,3 @@
-import Board from "./Board.mjs";
 import SearchTree from "./SearchTree.mjs";
 
 class BoardSolver
@@ -64,9 +63,8 @@ class BoardSolver
         let neighbours = [];
         for(let direction of board.availableDirections)
         {
-            let newBoard = new Board(board.toString(), board.solvedState);
-            newBoard.moveBlank(direction);
-            if(!this.#visitedStates.includes(newBoard))
+            let newBoard = board.getNeighbourByDirection(direction);
+            if(!this.#visitedStates.includes(newBoard.toString()))
             {
                 this.#neighbourHoodTree.addNode(board.toString(), newBoard.toString(), newBoard);
                 neighbours.push(newBoard);

@@ -21,14 +21,9 @@ class Board
         "right":"left",
     };
 
-    static get correctCells()
-    {
-        return "12345678 ";
-    }
-
     get isSolved()
     {
-        return this.toString() === Board.correctCells;
+        return this.toString() === this.solvedState;
     }
 
     show()
@@ -58,7 +53,6 @@ class Board
      */
     constructor(string="12345678 ", solvedState = "12345678 ", size=3)
     {
-        const cells = string.split("");
         this.#cells = [];
         for(let i = 0; i < size; i++)
         {
@@ -90,6 +84,13 @@ class Board
         string += " ";
         console.log(`String: "${string}"`);
         return new Board(string, string, size);
+    }
+
+    getNeighbourByDirection(direction)
+    {
+        let neighbour = new Board(this.toString(), this.solvedState, this.size);
+        neighbour.moveBlank(direction);
+        return neighbour;
     }
 
     moveBlank(direction)
