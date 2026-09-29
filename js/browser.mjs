@@ -120,6 +120,8 @@ import BoardSolver from './BoardSolver.mjs';
     document.addEventListener("DOMContentLoaded", ()=>{
         $board = document.getElementById("board");
         $solveButton = document.getElementById("solveButton");
+        $solveButton.innerHTML="Solve Game";
+        $solveButton.disabled = true;
 
         const $size = document.getElementById("size");
         document.getElementById("runButton").addEventListener("click", ()=>{
