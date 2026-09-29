@@ -14,6 +14,11 @@ class Board
         right:{x:1, y:0},
     }
 
+    get cells()
+    {
+        return this.#cells;
+    }
+
     #oppositeDirections = {
         "up":"down",
         "down":"up",
@@ -82,7 +87,6 @@ class Board
             string += alphabet.charAt(i - 1);
         }
         string += " ";
-        console.log(`String: "${string}"`);
         return new Board(string, string, size);
     }
 
