@@ -7,6 +7,7 @@ import Board from './Board.mjs';
     let $size;
     let $progress;
     let $heuristic;
+    let speed = 100;
 
 
     const solveWorker = new Worker('js/webworker.js', {
@@ -118,7 +119,7 @@ import Board from './Board.mjs';
             drawBoard();
             setTimeout(()=>{
                 animateRoute(route);
-            }, 100);
+            }, speed);
         }
         else
         {
