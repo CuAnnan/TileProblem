@@ -32,7 +32,7 @@ class IndexedSearchTree
         const path = [];
         let currentNode = node;
         while (currentNode) {
-            path.push(currentNode.item);
+            path.push({string: currentNode.item.toString(), solvedState: key, size: currentNode.item.size});
             currentNode = currentNode.parent;
         }
         return path.reverse();

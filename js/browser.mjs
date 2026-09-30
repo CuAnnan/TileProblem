@@ -1,12 +1,45 @@
 import Board from './Board.mjs';
-import BoardSolver from './BoardSolver.mjs';
 
 (()=>{
     let board;
     let $board;
     let $solveButton;
-    const MAX_ITERATIONS = 100000;
-    let currentIteration = 0;
+    let $size;
+    let $progress;
+
+    const solveWorker = new Worker('js/webworker.js', {
+        type: 'module'
+    });
+
+    solveWorker.onmessage = (event) => {
+        switch (event.data.action)
+        {
+            case "initialized":
+                console.log("Solver initialized");
+                break;
+            case "progress":
+                $progress.value += (`Iterations: ${event.data.iteration}\n`);
+                $progress.scrollTop = $progress.scrollHeight;
+                break;
+            case "solve":
+                if(event.data.solved)
+                {
+                    $progress.value += "Solved!\n";
+                    animateRoute(event.data.route);
+                }
+                else
+                {
+                    $progress.value += "Not solved\n";
+                    $board.classList.add("failed");
+                }
+                break;
+            case "error":
+                $progress.value += `Error: ${event.data.message}\n`;
+                $solveButton.innerHTML="Solve Game";
+                $solveButton.disabled = false;
+                break;
+        }
+    };
 
     function drawBoard()
     {
@@ -42,7 +75,7 @@ import BoardSolver from './BoardSolver.mjs';
 
     function handleKeyPress(event)
     {
-        if(board.isSolved)
+        if(!board || board.isSolved)
         {
             return;
         }
@@ -79,11 +112,16 @@ import BoardSolver from './BoardSolver.mjs';
         let current = route.shift();
         if(current)
         {
-            board = current;
+            board = new Board(current.string, current.solvedState, current.size);
             drawBoard();
             setTimeout(()=>{
                 animateRoute(route);
             }, 100);
+        }
+        else
+        {
+            $solveButton.innerHTML="Solve Game";
+            $solveButton.disabled = false;
         }
     }
 
@@ -95,26 +133,23 @@ import BoardSolver from './BoardSolver.mjs';
         }
         $solveButton.innerHTML="Solving...";
         $solveButton.disabled = true;
+        solveWorker.postMessage({action:"solve"});
+    }
 
-        setTimeout(()=>{
-            const boardSolver = new BoardSolver(board);
-            currentIteration = 0;
-            while(currentIteration < MAX_ITERATIONS && !boardSolver.isSolved)
-            {
-                console.log(currentIteration);
-                boardSolver.greedyScan(2);
-                currentIteration++;
-            }
-            if(boardSolver.isSolved)
-            {
-                let route = boardSolver.getRoute();
-                animateRoute(route);
-            }
-            else
-            {
-                $board.classList.add("failed");
-            }
-        },0);
+    function newBoard()
+    {
+        $board.classList.remove("solved");
+        $board.classList.remove("failed");
+        const size = Number($size.value);
+        if(size === 0) {
+            return;
+        }
+        board = Board.bySize(size);
+        board.shuffle(1000);
+        drawBoard();
+        $solveButton.removeAttribute("disabled");
+        solveWorker.postMessage({action:"init", board:{string:board.toString(), solvedState:board.solvedState, size:board.size}});
+        $progress.value = "";
     }
 
     document.addEventListener("DOMContentLoaded", ()=>{
@@ -122,20 +157,10 @@ import BoardSolver from './BoardSolver.mjs';
         $solveButton = document.getElementById("solveButton");
         $solveButton.innerHTML="Solve Game";
         $solveButton.disabled = true;
+        $size = document.getElementById("size");
+        $progress = document.getElementById("progress");
 
-        const $size = document.getElementById("size");
-        document.getElementById("runButton").addEventListener("click", ()=>{
-            $board.classList.remove("solved");
-            $board.classList.remove("failed");
-            const size = Number($size.value);
-            if(size === 0) {
-                return;
-            }
-            board = Board.bySize(size);
-            board.shuffle(1000);
-            drawBoard();
-            $solveButton.removeAttribute("disabled");
-        });
+        document.getElementById("runButton").addEventListener("click",  newBoard);
 
         $solveButton.addEventListener("click", solveBoard);
 

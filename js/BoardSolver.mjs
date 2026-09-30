@@ -1,5 +1,9 @@
 import SearchTree from "./SearchTree.mjs";
 
+const MAX_ITERATIONS = 100000;
+const YIELD_INTERVAL = 100;
+
+
 class BoardSolver
 {
     #states;
@@ -24,7 +28,7 @@ class BoardSolver
         {
             return;
         }
-        this.#states.push({board, weight:this.getBoardWeight(board)});
+        this.#states.push({board, weight:this.getHammingWeight(board)});
         this.#states.sort((a, b) => a.weight - b.weight);
         this.#visitedStates.push(board.toString());
     }
@@ -50,6 +54,37 @@ class BoardSolver
             }
             this.addBoard(neighbour);
         }
+    }
+
+    async solve(reportProgressCallback)
+    {
+        let iteration = 0;
+        while(!this.isSolved && iteration < MAX_ITERATIONS)
+        {
+            for (let i = 0; i < YIELD_INTERVAL && !this.isSolved; i++)
+            {
+                this.greedyScan(2);
+                iteration++;
+            }
+
+            // report progress to the callback function if provided
+            if (reportProgressCallback)
+            {
+                reportProgressCallback({
+                    iteration,
+                    solved: this.isSolved,
+                });
+            }
+
+            // Yield control back to the event loop to keep web worker responsive to more messages
+            if (!this.isSolved && iteration < MAX_ITERATIONS) {
+                await new Promise(resolve => setTimeout(resolve, 0));
+            }
+
+        }
+        return this.isSolved
+            ? { solved: true, route: this.getRoute() }
+            : { solved: false, route:[] };
     }
 
     /**
@@ -80,7 +115,7 @@ class BoardSolver
 
 
 
-    getBoardWeight(board)
+    getHammingWeight(board)
     {
         let string = board.toString();
         let correct = board.solvedState;
@@ -88,7 +123,7 @@ class BoardSolver
 
         for(let i = 0; i< string.length; i++)
         {
-            if(string.charAt(i) !== correct.charAt(i))
+            if(string.charAt(i) !== " " && string.charAt(i) !== correct.charAt(i))
             {
                 weight++;
             }
