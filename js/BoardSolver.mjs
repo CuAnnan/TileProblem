@@ -1,6 +1,7 @@
 import SearchTree from "./SearchTree.mjs";
+import PriorityQueue from "./PriorityQueue.mjs";
 
-const MAX_ITERATIONS = 100000;
+const MAX_ITERATIONS = 10000000;
 const YIELD_INTERVAL = 100;
 
 
@@ -15,8 +16,8 @@ class BoardSolver
     constructor(board)
     {
         this.board = board;
-        this.#states = [];
-        this.#visitedStates = [];
+        this.#states = new PriorityQueue();
+        this.#visitedStates = new Set();
         this.addBoard(board);
         this.#neighbourHoodTree = new SearchTree(board.toString(), board);
         this.isSolved = board.isSolved;
@@ -24,13 +25,12 @@ class BoardSolver
 
     addBoard(board)
     {
-        if(this.#visitedStates.includes(board.toString()))
+        if(this.#visitedStates.has(board.toString()))
         {
             return;
         }
-        this.#states.push({board, weight:this.getHammingWeight(board)});
-        this.#states.sort((a, b) => a.weight - b.weight);
-        this.#visitedStates.push(board.toString());
+        this.#states.add(board, this.getHammingWeight(board));
+        this.#visitedStates.add(board.toString());
     }
 
     getRoute()
@@ -44,7 +44,11 @@ class BoardSolver
 
     greedyScan(depth=2)
     {
-        let board = this.#states.shift().board;
+        if(this.#states.size === 0)
+        {
+            return;
+        }
+        let board = this.#states.pop();
         let neighbours = this.getBoardNeighbours(board, depth);
         for(let neighbour of neighbours)
         {
@@ -99,7 +103,7 @@ class BoardSolver
         for(let direction of board.availableDirections)
         {
             let newBoard = board.getNeighbourByDirection(direction);
-            if(!this.#visitedStates.includes(newBoard.toString()))
+            if(!this.#visitedStates.has(newBoard.toString()))
             {
                 this.#neighbourHoodTree.addNode(board.toString(), newBoard.toString(), newBoard);
                 neighbours.push(newBoard);
