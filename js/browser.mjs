@@ -153,6 +153,7 @@ import Board from './Board.mjs';
         solveWorker.postMessage({action:"init", board:{string:board.toString(), solvedState:board.solvedState, size:board.size}});
         $progress.value = "";
         $heuristic.removeAttribute("disabled");
+        solveWorker.postMessage({action:"setHeuristic", heuristic:$heuristic.value});
     }
 
     document.addEventListener("DOMContentLoaded", ()=>{
