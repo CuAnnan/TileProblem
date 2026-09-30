@@ -47,6 +47,14 @@
                             <option value="5">5x5</option>
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label for="weight" class="form-label">Select Heuristic Weight:</label>
+                        <select class="form-select" id="weight" required>
+                            <option value="" disabled selected>Select weight</option>
+                            <option value="Hamming">Hamming</option>
+                            <option value="Manhattan">Manhattan</option>
+                        </select>
+                    </div>
                     <button id="runButton" class="btn btn-primary">Start Game</button>
                     <button id="solveButton" class="btn btn-primary" disabled>Solve Game</button>
                     <div class="mb-3">

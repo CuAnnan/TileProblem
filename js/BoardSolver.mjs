@@ -130,6 +130,27 @@ class BoardSolver
         }
         return weight;
     }
+
+    getManhattanWeight(board)
+    {
+        let string = board.toString();
+        let correct = board.solvedState;
+        let weight = 0;
+
+        for(let i = 0; i< string.length; i++)
+        {
+            if(string.charAt(i) !== " ")
+            {
+                let currentRow = Math.floor(i / board.size);
+                let currentCol = i % board.size;
+                let correctIndex = correct.indexOf(string.charAt(i));
+                let correctRow = Math.floor(correctIndex / board.size);
+                let correctCol = correctIndex % board.size;
+                weight += Math.abs(currentRow - correctRow) + Math.abs(currentCol - correctCol);
+            }
+        }
+        return weight;
+    }
 }
 
 export default BoardSolver;
