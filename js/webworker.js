@@ -5,7 +5,6 @@ let board;
 let boardSolver;
 
 self.onmessage = (event) => {
-    console.log(event.data.action);
     switch(event.data.action)
     {
         case "init":
@@ -13,6 +12,16 @@ self.onmessage = (event) => {
             board = new Board(boardData.string, boardData.solvedState, boardData.size);
             boardSolver = new BoardSolver(board);
             postMessage({action:"initialized"});
+            break;
+        case "setHeuristic":
+            if(!boardSolver) {
+                postMessage({
+                    action: "error",
+                    message: "Solver has not been initialized"
+                });
+                break;
+            }
+            boardSolver.setHeuristic(event.data.heuristic);
             break;
         case "solve":
             if (!boardSolver) {

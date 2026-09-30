@@ -12,6 +12,7 @@ class BoardSolver
     #neighbourHoodTree;
     isSolved;
     board;
+    #heuristic;
 
     constructor(board)
     {
@@ -21,6 +22,7 @@ class BoardSolver
         this.addBoard(board);
         this.#neighbourHoodTree = new SearchTree(board.toString(), board);
         this.isSolved = board.isSolved;
+        this.#heuristic = "Hamming";
     }
 
     addBoard(board)
@@ -29,7 +31,9 @@ class BoardSolver
         {
             return;
         }
-        this.#states.add(board, this.getHammingWeight(board));
+        let heuristic = this.#heuristic === "Hamming" ? this.getHammingWeight(board) : this.getManhattanWeight(board);
+        console.log("Using "+this.#heuristic);
+        this.#states.add(board, heuristic);
         this.#visitedStates.add(board.toString());
     }
 
@@ -42,7 +46,7 @@ class BoardSolver
         return this.#neighbourHoodTree.getPathFromRoot(this.board.solvedState);
     }
 
-    greedyScan(depth=2)
+    greedyScan(depth=1)
     {
         if(this.#states.size === 0)
         {
@@ -115,6 +119,11 @@ class BoardSolver
             }
         }
         return neighbours;
+    }
+
+    setHeuristic(heuristic)
+    {
+        this.#heuristic = heuristic;
     }
 
 

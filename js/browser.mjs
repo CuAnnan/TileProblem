@@ -6,6 +6,8 @@ import Board from './Board.mjs';
     let $solveButton;
     let $size;
     let $progress;
+    let $heuristic;
+
 
     const solveWorker = new Worker('js/webworker.js', {
         type: 'module'
@@ -150,6 +152,7 @@ import Board from './Board.mjs';
         $solveButton.removeAttribute("disabled");
         solveWorker.postMessage({action:"init", board:{string:board.toString(), solvedState:board.solvedState, size:board.size}});
         $progress.value = "";
+        $heuristic.removeAttribute("disabled");
     }
 
     document.addEventListener("DOMContentLoaded", ()=>{
@@ -159,6 +162,15 @@ import Board from './Board.mjs';
         $solveButton.disabled = true;
         $size = document.getElementById("size");
         $progress = document.getElementById("progress");
+        $heuristic = document.getElementById("heuristic");
+
+        $heuristic.addEventListener("change", () => {
+            if(board)
+            {
+                solveWorker.postMessage({action:"setHeuristic", heuristic:$heuristic.value});
+            }
+        });
+
 
         document.getElementById("runButton").addEventListener("click",  newBoard);
 
